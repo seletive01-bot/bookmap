@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>BookMap – Explore Books by Location</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- CesiumJS CSS -->
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+
+    <!-- Custom UI CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<!-- Top-right user chip -->
+<div id="userChip">
+  <span class="user-email"><i class="fa fa-user"></i> {{ user_email }}</span>
+  <a href="/logout" class="logout-link"><i class="fa fa-sign-out-alt"></i></a>
+</div>
+
+<!-- Floating Search Bar -->
+<div id="searchBar">
+    <i class="fa fa-search"></i>
+    <input id="globalSearch" type="text" placeholder="Search books, authors, tags or places..." autocomplete="off">
+</div>
+
+<!-- Sidebar (desktop) / Bottom sheet (mobile) -->
+<div id="sidebar">
+    <!-- little handle only visible on mobile -->
+    <div id="sidebarHandle" class="mobile-handle"></div>
+
+    <h2><i class="fa fa-book"></i> Books in Area</h2>
+
+    <div id="filtersBar">
+        <input id="tagFilter" type="text" placeholder="Filter by tag…" />
+        <input id="categoryFilter" type="text" placeholder="Category…" />
+        <button id="toggleHeatmapBtn" type="button" title="Toggle heatmap">
+            <i class="fa fa-fire"></i>
+        </button>
+    </div>
+
+    <div id="bookCount"></div>
+
+    <!-- scrolls independently inside the card -->
+    <div id="bookList"></div>
+</div>
+
+<!-- 3D Earth Container -->
+<div id="cesiumContainer"></div>
+
+<!-- Add Book FAB -->
+<button id="addBookBtn" title="Add book">
+    <i class="fa fa-plus"></i>
+</button>
+
+<!-- Add Book Modal -->
+<div id="addBookModal" class="modal">
+  <div class="modal-backdrop"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><i class="fa fa-book-open"></i> Add a Book</h3>
+      <button type="button" class="modal-close">&times;</button>
+    </div>
+    <form id="addBookForm" class="modal-body" enctype="multipart/form-data">
+      <div class="form-row">
+        <label>Title</label>
+        <input name="title" required />
+      </div>
+      <div class="form-row">
+        <label>Author</label>
+        <input name="author" required />
+      </div>
+      <div class="form-row two">
+        <div>
+          <label>Year</label>
+          <input name="year" type="number" min="0" />
+        </div>
+        <div>
+          <label>Category</label>
+          <input name="category" placeholder="Fantasy, History…" />
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Tags (comma separated)</label>
+        <input name="tags" placeholder="magic, novel, classic" />
+      </div>
+      <div class="form-row">
+        <label>Cover image URL</label>
+        <input name="cover_url" placeholder="https://…" />
+      </div>
+      <div class="form-row">
+        <label>PDF File</label>
+        <input type="file" name="pdf_file" id="pdf_file" accept="application/pdf" />
+      </div>
+      <div class="form-row">
+        <label>Location name (city, place…)</label>
+        <input name="place" placeholder="Chennai, Dubai, London…" required />
+      </div>
+      <div class="form-row">
+        <label>Description</label>
+        <textarea name="description" rows="3" placeholder="Short description…"></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="secondary modal-close">Cancel</button>
+        <button type="submit" class="primary">
+          <i class="fa fa-save"></i> Save book
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<div id="bookPopup" class="custom-popup hidden">
+    <div class="popup-content">
+        <button class="popup-close" onclick="hidePopup()">×</button>
+        <h3 id="ppTitle"></h3>
+        <p id="ppAuthor"></p>
+        <p id="ppYear"></p>
+        <p id="ppLocation"></p>
+
+        <button id="ppReadBtn" class="popup-read-btn">
+            📖 Read Book
+        </button>
+    </div>
+</div>
+
+
+<!-- CesiumJS -->
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
+
+<!-- Custom JS -->
+<script src="/static/js/main.js"></script>
+
+</body>
+</html>

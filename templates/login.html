@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>BookMap – Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, sans-serif;
+      background: radial-gradient(circle at top, #1f2937, #020617);
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: rgba(15,23,42,0.96);
+      border-radius: 18px;
+      padding: 32px 28px;
+      width: 360px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.65);
+      border: 1px solid rgba(148,163,184,0.35);
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 24px;
+    }
+    p.sub {
+      margin: 0 0 20px;
+      color: #9ca3af;
+      font-size: 14px;
+    }
+    label {
+      font-size: 13px;
+      color: #cbd5f5;
+      display: block;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      padding: 9px 11px;
+      border-radius: 10px;
+      border: 1px solid rgba(148,163,184,0.7);
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 14px;
+      margin-bottom: 14px;
+      outline: none;
+    }
+    input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px #0ea5e9;
+    }
+    button {
+      width: 100%;
+      padding: 10px 0;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg,#38bdf8,#6366f1);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 15px;
+      margin-top: 6px;
+      box-shadow: 0 12px 30px rgba(37,99,235,0.55);
+    }
+    button:hover { filter: brightness(1.08); }
+    .error {
+      background: rgba(239,68,68,0.16);
+      border-radius: 10px;
+      border: 1px solid rgba(248,113,113,0.45);
+      padding: 8px 10px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      color: #fecaca;
+    }
+  </style>
+</head>
+<body>
+  <form class="card" method="post">
+    <h1>BookMap</h1>
+    <p class="sub">Sign in to manage your map.</p>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" placeholder="you@example.com" />
+
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" required />
+
+    <button type="submit">
+      <i class="fa fa-sign-in-alt"></i> Sign in
+    </button>
+  </form>
+</body>
+</html>
