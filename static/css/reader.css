@@ -1,0 +1,127 @@
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  background: radial-gradient(circle at top, #1f2937, #020617);
+  color: #e5e7eb;
+}
+
+.reader-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 18px 18px 24px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.reader-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(148,163,184,0.4);
+  margin-bottom: 12px;
+  animation: headerSlide 0.6s ease;
+}
+
+.reader-header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+.reader-header .author {
+  margin: 4px 0 2px;
+  color: #9ca3af;
+}
+.reader-header .category {
+  margin: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #fde68a;
+}
+
+.reader-header .actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.reader-header .chip {
+  border-radius: 999px;
+  padding: 6px 12px;
+  border: 1px solid rgba(148,163,184,0.7);
+  background: rgba(15,23,42,0.9);
+  color: #e5e7eb;
+  text-decoration: none;
+  font-size: 13px;
+}
+#themeToggle {
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg,#38bdf8,#6366f1);
+  color: white;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 12px 28px rgba(37,99,235,0.6);
+}
+
+.reader-main {
+  flex: 1;
+  margin-top: 10px;
+  animation: readerFade 0.7s ease;
+}
+
+.pdf-frame-wrap {
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(148,163,184,0.6);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.8);
+}
+
+.pdf-frame {
+  width: 100%;
+  height: calc(100vh - 120px);
+  border: none;
+  background: #000;
+}
+
+.no-pdf {
+  text-align: center;
+  margin-top: 60px;
+  color: #9ca3af;
+}
+
+/* Light mode */
+body.light {
+  background: #f3f4f6;
+  color: #111827;
+}
+body.light .reader-header {
+  border-bottom-color: #e5e7eb;
+}
+body.light .reader-header .chip {
+  background: white;
+  color: #111827;
+}
+body.light .pdf-frame-wrap {
+  box-shadow: 0 18px 40px rgba(148,163,184,0.6);
+}
+
+/* Animations */
+@keyframes headerSlide {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes readerFade {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pdf-frame {
+    height: calc(100vh - 140px);
+  }
+}
