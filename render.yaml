@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: bookmap
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app"
+    envVars:
+      - key: SECRET_KEY
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DB
+        value: bookmap
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: ADMIN_PASSWORD
+        value: admin123
