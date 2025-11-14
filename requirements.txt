@@ -4,3 +4,4 @@ python-dotenv
 cloudinary
 dnspython
 Werkzeug
+gunicorn
