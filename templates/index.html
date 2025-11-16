@@ -1,73 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>BookMap – Explore Books by Location</title>
+  <meta charset="utf-8" />
+  <title>BookMap – Explore Books by Location</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- CesiumJS CSS -->
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <!-- CesiumJS CSS -->
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 
-    <!-- Custom UI CSS -->
-    <link rel="stylesheet" href="/static/css/style.css">
+  <!-- Custom UI CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
 
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
+  <!-- 3D Earth (background) -->
+  <div id="cesiumContainer"></div>
 
-<!-- Top-right user chip -->
-<div id="userChip">
-  <span class="user-email"><i class="fa fa-user"></i> {{ user_email }}</span>
-  <a href="/logout" class="logout-link"><i class="fa fa-sign-out-alt"></i></a>
-</div>
-
-<!-- Floating Search Bar -->
-<div id="searchBar">
-    <i class="fa fa-search"></i>
-    <input id="globalSearch" type="text" placeholder="Search books, authors, tags or places..." autocomplete="off">
-</div>
-
-<!-- Sidebar (desktop) / Bottom sheet (mobile) -->
-<div id="sidebar">
-    <!-- little handle only visible on mobile -->
-    <div id="sidebarHandle" class="mobile-handle"></div>
-
-    <h2><i class="fa fa-book"></i> Books in Area</h2>
-
-    <div id="filtersBar">
-        <input id="tagFilter" type="text" placeholder="Filter by tag…" />
-        <input id="categoryFilter" type="text" placeholder="Category…" />
-        <button id="toggleHeatmapBtn" type="button" title="Toggle heatmap">
-            <i class="fa fa-fire"></i>
-        </button>
+  <!-- Top bar -->
+  <header id="topBar">
+    <div class="brand">
+  
+      <div class="brand-text">
+        <span class="brand-title">BookMap</span>
+        <span class="brand-sub">Explore books by location</span>
+      </div>
     </div>
 
-    <div id="bookCount"></div>
-
-    <!-- scrolls independently inside the card -->
-    <div id="bookList"></div>
-</div>
-
-<!-- 3D Earth Container -->
-<div id="cesiumContainer"></div>
-
-<!-- Add Book FAB -->
-<button id="addBookBtn" title="Add book">
-    <i class="fa fa-plus"></i>
-</button>
-
-<!-- Add Book Modal -->
-<div id="addBookModal" class="modal">
-  <div class="modal-backdrop"></div>
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3><i class="fa fa-book-open"></i> Add a Book</h3>
-      <button type="button" class="modal-close">&times;</button>
+    <div id="searchBar">
+      <i class="fa fa-search"></i>
+      <input id="globalSearch" type="text"
+             placeholder="Search books, authors, tags or places..."
+             autocomplete="off">
     </div>
-    <form id="addBookForm" class="modal-body" enctype="multipart/form-data">
+
+    
+  </header>
+
+  <!-- Left: Add Book panel (slides up on desktop & mobile) -->
+  <aside id="addPanel" class="collapsed">
+    <div class="add-panel-header">
+      <div>
+        <h2>Add a Book</h2>
+        <p>Pin a book to a real-world location.</p>
+      </div>
+      <button id="addPanelToggle" type="button">
+        <i class="fa fa-plus"></i>
+        <span>Add Book</span>
+      </button>
+    </div>
+
+    <form id="addBookForm" class="add-panel-form" enctype="multipart/form-data">
       <div class="form-row">
         <label>Title</label>
         <input name="title" required />
@@ -107,35 +93,60 @@
         <textarea name="description" rows="3" placeholder="Short description…"></textarea>
       </div>
 
-      <div class="modal-footer">
-        <button type="button" class="secondary modal-close">Cancel</button>
+      <div class="add-panel-footer">
         <button type="submit" class="primary">
           <i class="fa fa-save"></i> Save book
         </button>
       </div>
     </form>
-  </div>
-</div>
-<div id="bookPopup" class="custom-popup hidden">
-    <div class="popup-content">
-        <button class="popup-close" onclick="hidePopup()">×</button>
-        <h3 id="ppTitle"></h3>
-        <p id="ppAuthor"></p>
-        <p id="ppYear"></p>
-        <p id="ppLocation"></p>
+  </aside>
 
-        <button id="ppReadBtn" class="popup-read-btn">
-            📖 Read Book
-        </button>
+  <!-- Left Sidebar – vertical Books list -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">
+        <i class="fa fa-book"></i>
+        <span>Books in Area</span>
+      </div>
+      <span id="bookCount">0 books</span>
     </div>
-</div>
 
+    <div class="sidebar-filters">
+      <input id="tagFilter" type="text" placeholder="Filter by tag…" />
+      <input id="categoryFilter" type="text" placeholder="Category…" />
+      <button id="toggleHeatmapBtn" type="button" title="Toggle heatmap">
+        <i class="fa fa-fire"></i>
+      </button>
+    </div>
 
-<!-- CesiumJS -->
-<script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
+    <!-- JS fills this -->
+    <div id="bookList"></div>
+  </aside>
 
-<!-- Custom JS -->
-<script src="/static/js/main.js"></script>
+  <!-- Bottom-right FAB to open Add Book panel -->
+  <button id="addBookFab" title="Add book">
+    <i class="fa fa-plus"></i>
+  </button>
 
+  <!-- Custom popup near markers -->
+  <div id="bookPopup" class="custom-popup hidden">
+    <div class="popup-content">
+      <button id="bookPopupClose" class="popup-close">×</button>
+      <h3 id="ppTitle"></h3>
+      <p id="ppAuthor"></p>
+      <p id="ppYear"></p>
+      <p id="ppLocation"></p>
+
+      <button id="ppReadBtn" class="popup-read-btn">
+        📖 Read Book
+      </button>
+    </div>
+  </div>
+
+  <!-- CesiumJS -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
+
+  <!-- Custom JS -->
+  <script src="/static/js/main.js"></script>
 </body>
 </html>
