@@ -1,5 +1,5 @@
 /* =========================
-   RESET / GLOBAL
+   GLOBAL RESET
 ========================= */
 *,
 *::before,
@@ -8,156 +8,303 @@
 }
 
 html, body {
-  height: 100%;
-  width: 100%;
   margin: 0;
   padding: 0;
+  height: 100%;
+  width: 100%;
   overflow: hidden;
-  font-family: "Inter", system-ui, sans-serif;
-  background: #020617;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: radial-gradient(circle at top left, #020617 0%, #020617 40%, #000 100%);
+  color: #e5e7eb;
 }
 
-/* CESIUM 3D EARTH */
+/* =========================
+   CESIUM 3D EARTH
+========================= */
 #cesiumContainer {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 1; /* UI above this */
 }
 
 /* =========================
-   USER CHIP (top-right)
+   TOP BAR
 ========================= */
-#userChip {
+#topBar {
   position: absolute;
-  top: 14px;
-  right: 16px;
-  z-index: 1000;
+  top: 16px;
+  left: 20px;
+  right: 20px;
+  z-index: 20;
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(15,23,42,0.85);
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(148,163,184,0.45);
-  font-size: 12px;
-  color: #e5e7eb;
-  backdrop-filter: blur(10px);
-}
-#userChip .logout-link {
-  color: #f97373;
-  text-decoration: none;
-  font-size: 13px;
+  gap: 16px;
 }
 
-/* =========================
-   FLOATING SEARCH BAR
-========================= */
-#searchBar {
-  position: absolute;
-  top: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 420px;
-  max-width: calc(100% - 160px);
-  background: radial-gradient(circle at top, rgba(30,64,175,0.9), rgba(15,23,42,0.95));
-  backdrop-filter: blur(16px);
-  padding: 11px 16px;
-  border-radius: 999px;
+/* Brand */
+.brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #e5e7eb;
-  z-index: 999;
-  box-shadow: 0 20px 40px rgba(15,23,42,0.8);
-  border: 1px solid rgba(96,165,250,0.55);
-}
-#searchBar i {
-  font-size: 14px;
-}
-#searchBar input {
-  border: none;
-  outline: none;
-  width: 100%;
-  font-size: 14px;
-  background: transparent;
-  color: #f9fafb;
 }
 
-/* =========================
-   SIDEBAR – DESKTOP
-========================= */
-#sidebar {
-  position: absolute;
-  left: 22px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 320px;
-  max-height: calc(100% - 120px);
-  background: radial-gradient(circle at top left, rgba(30,64,175,0.9), rgba(15,23,42,0.97));
-  border-radius: 20px;
-  padding: 16px 16px 14px;
-  backdrop-filter: blur(18px);
-  z-index: 900;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.7);
-  border: 1px solid rgba(148,163,184,0.40);
+.brand-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 20%, #38bdf8, #1d4ed8);
+  box-shadow: 0 0 20px rgba(59,130,246,0.6);
+}
 
+.brand-text {
   display: flex;
   flex-direction: column;
 }
 
-/* little grab handle, only visible on mobile */
-.mobile-handle {
-  width: 40px;
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(148,163,184,0.9);
-  margin: 0 auto 10px;
-  display: none;
+.brand-title {
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.02em;
 }
 
-/* title */
-#sidebar h2 {
-  margin: 0 0 10px;
-  color: #f9fafb;
-  font-size: 18px;
+.brand-sub {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Search bar */
+#searchBar {
+  flex: 1;
+  max-width: 520px;
+  margin-inline: auto;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: radial-gradient(circle at top, rgba(30,64,175,0.95), rgba(15,23,42,0.96));
+  border: 1px solid rgba(96,165,250,0.6);
+  box-shadow: 0 24px 50px rgba(15,23,42,0.9);
 }
-#sidebar h2 i {
-  font-size: 15px;
+
+#searchBar i {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+#searchBar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #f9fafb;
+  font-size: 14px;
+}
+
+/* User chip */
+#userChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(15,23,42,0.9);
+  border: 1px solid rgba(148,163,184,0.5);
+  font-size: 12px;
+  backdrop-filter: blur(10px);
 }
 
 /* =========================
-   FILTER BAR – shared base
+   LEFT ADD-BOOK PANEL
 ========================= */
-#filtersBar {
+#addPanel {
+  position: absolute;
+  top: 40px;
+  left: 22px;
+  width: 320px;
+  max-width: calc(100% - 44px);
+  padding: 18px 18px 14px;
+  border-radius: 22px;
+  background: radial-gradient(circle at top left, rgba(30,64,175,0.95), rgba(15,23,42,0.98));
+  border: 1px solid rgba(148,163,184,0.45);
+  box-shadow: 0 30px 70px rgba(0,0,0,0.85);
+  z-index: 18;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* slide DOWN (hidden) on desktop by default */
+#addPanel.collapsed {
+  transform: translateY(40%);
+  opacity: 0.0;
+  pointer-events: none;
+}
+
+.add-panel-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.add-panel-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.add-panel-header p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+#addPanelToggle {
+  border: none;
+  border-radius: 999px;
+  padding: 7px 14px;
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  background: linear-gradient(135deg,#38bdf8,#6366f1);
+  color: white;
+  box-shadow: 0 14px 30px rgba(37,99,235,0.65);
+}
+
+/* collapsible form */
+.add-panel-form {
+  margin-top: 8px;
+  border-top: 1px solid rgba(148,163,184,0.45);
+  padding-top: 10px;
+}
+
+/* form fields */
+.form-row {
   margin-bottom: 10px;
 }
 
-#filtersBar input {
-  flex: 1 1 auto;
+.form-row.two {
+  display: flex;
+  gap: 10px;
+}
+
+.form-row label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: #cbd5f5;
+}
+
+.form-row input,
+.form-row textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(148,163,184,0.7);
+  background: rgba(15,23,42,0.95);
+  color: #e5e7eb;
+  font-size: 13px;
+  padding: 7px 9px;
+  outline: none;
+}
+
+.form-row input:focus,
+.form-row textarea:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1px #0ea5e9;
+}
+
+.add-panel-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.add-panel-footer .primary {
+  border-radius: 999px;
+  border: none;
+  padding: 7px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  background: linear-gradient(135deg,#38bdf8,#6366f1);
+  color: white;
+  box-shadow: 0 14px 30px rgba(37,99,235,0.65);
+}
+
+/* =========================
+   LEFT SIDEBAR – BOOK LIST
+========================= */
+#sidebar {
+  position: absolute;
+  top: 260px;
+  left: 22px;
+  width: 320px;
+  max-height: calc(100% - 280px);
+  padding: 14px 14px 12px;
+  border-radius: 20px;
+  background: radial-gradient(circle at top left, rgba(15,23,42,0.96), rgba(15,23,42,0.98));
+  border: 1px solid rgba(31,41,55,0.95);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.9);
+  z-index: 17;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sidebar-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sidebar-title i {
+  font-size: 15px;
+}
+
+#bookCount {
+  font-size: 12px;
+  color: #e5e7eb;
+}
+
+/* Filters row */
+.sidebar-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.sidebar-filters input {
   min-width: 0;
   border-radius: 999px;
   border: 1px solid rgba(148,163,184,0.6);
   background: rgba(15,23,42,0.9);
   color: #e5e7eb;
-  font-size: 12px;
-  padding: 6px 10px;
+  font-size: 11px;
+  padding: 5px 9px;
   outline: none;
 }
-#filtersBar input:focus {
+
+.sidebar-filters input:focus {
   border-color: #38bdf8;
   box-shadow: 0 0 0 1px #0ea5e9;
 }
 
 #toggleHeatmapBtn {
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
   border: none;
   background: radial-gradient(circle at top, #f97316, #ef4444);
@@ -166,51 +313,56 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 14px 30px rgba(248,113,113,0.55);
+  box-shadow: 0 10px 24px rgba(248,113,113,0.55);
+  font-size: 13px;
 }
+
 #toggleHeatmapBtn.active {
   filter: brightness(1.1);
 }
 
-#bookCount {
-  font-size: 13px;
-  margin-bottom: 8px;
-  color: #e5e7eb;
-}
-
-/* BOOK LIST SCROLLS INSIDE CARD */
+/* Book list (vertical) */
 #bookList {
-  padding-right: 4px;
   flex: 1;
   overflow-y: auto;
+  padding-right: 4px;
 }
 
 /* =========================
-   BOOK CARDS
+   COMPACT BOOK CARDS
 ========================= */
 .book-card {
-  background: rgba(15,23,42,0.86);
-  padding: 8px;
+  width: 100%;
+  padding: 8px 10px;
   border-radius: 14px;
-  margin-bottom: 10px;
-  border: 1px solid rgba(148,163,184,0.55);
+  margin-bottom: 8px;
+  background: rgba(15,23,42,0.86);
+  border: 1px solid rgba(31,41,55,0.95);
   cursor: pointer;
+  display: flex;
+  align-items: center;
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease,
     border-color 0.15s ease,
     background 0.15s ease;
+  min-height: 70px; /* reduced height */
 }
+
 .book-card:hover {
-  background: rgba(30,64,175,0.9);
+  background: rgba(30,64,175,0.96);
   transform: translateY(-1px);
-  box-shadow: 0 12px 30px rgba(37,99,235,0.55);
-  border-color: rgba(129,140,248,0.9);
+  box-shadow: 0 12px 30px rgba(37,99,235,0.65);
+  border-color: rgba(129,140,248,0.95);
 }
+
 .book-card-inner {
   display: flex;
   gap: 10px;
+  align-items: center;
+  width: 100%;
 }
+
 .book-cover {
   width: 40px;
   height: 56px;
@@ -220,515 +372,415 @@ html, body {
   background-color: #020617;
   flex-shrink: 0;
 }
+
 .book-cover.placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-}
-.book-meta {
-  flex: 1;
-  min-width: 0;
-}
-.book-title {
-  color: #f9fafb;
-  font-size: 15px;
-  font-weight: 600;
-}
-.book-author {
-  color: #cbd5f5;
-  font-size: 13px;
-  margin-top: 2px;
-}
-.book-category {
-  margin-top: 3px;
-  font-size: 11px;
-  color: #fef3c7;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.book-tags {
-  margin-top: 4px;
-}
-.book-tags span {
-  display: inline-block;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: rgba(15,118,110,0.7);
-  color: #a7f3d0;
-  margin-right: 4px;
+  font-size: 18px;
 }
 
-.book-meta .read-link {
-  margin-top: 6px;
-  padding: 5px 10px;
-  border-radius: 999px;
+/* text + button block */
+.book-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.book-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.book-title {
+  color: #f9fafb;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.book-author {
+  color: #cbd5f5;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.book-category,
+.book-tags {
+  display: none; /* hide for compact layout */
+}
+
+/* Read button – to the right, slightly bigger */
+.book-meta .read-link,
+.read-link {
   border: none;
-  background: linear-gradient(135deg,#38bdf8,#6366f1);
-  color: white;
+  border-radius: 999px;
+  padding: 4px 10px;
   font-size: 11px;
   cursor: pointer;
+  background: linear-gradient(135deg,#38bdf8,#6366f1);
+  color: white;
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap;
 }
+
 .book-meta .read-link i {
   font-size: 11px;
 }
 
 /* =========================
-   ADD BOOK FAB
+   CUSTOM POPUP
 ========================= */
-#addBookBtn {
+.custom-popup {
   position: absolute;
-  right: 24px;
-  bottom: 24px;
+  z-index: 50;
+  background: rgba(15,23,42,0.97);
+  border: 1px solid rgba(148,163,184,0.45);
+  border-radius: 16px;
+  padding: 12px 14px;
+  width: 260px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+  backdrop-filter: blur(10px);
+}
+
+.custom-popup.hidden {
+  display: none;
+}
+
+.popup-content {
+  position: relative;
+  color: #e5e7eb;
+}
+
+.popup-close {
+  position: absolute;
+  right: -2px;
+  top: -8px;
+  border: none;
+  background: transparent;
+  color: #e5e7eb;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.popup-read-btn {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: linear-gradient(135deg,#38bdf8,#6366f1);
+  border-radius: 12px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+/* =========================
+   FAB – Add Book (bottom-right)
+========================= */
+#addBookFab {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
   width: 52px;
   height: 52px;
   border-radius: 999px;
   border: none;
   background: radial-gradient(circle at top, #22c55e, #16a34a);
   color: white;
-  z-index: 950;
+  z-index: 30;
   cursor: pointer;
   box-shadow: 0 18px 45px rgba(22,163,74,0.65);
   font-size: 20px;
-}
-#addBookBtn:hover {
-  filter: brightness(1.08);
-}
-
-/* =========================
-   MODAL
-========================= */
-.modal {
-  position: fixed;
-  inset: 0;
-  display: none;
-  z-index: 1001;
-}
-.modal.open {
-  display: block;
-}
-.modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(15,23,42,0.75);
-  backdrop-filter: blur(6px);
-}
-.modal-content {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 440px;
-  max-width: calc(100% - 40px);
-  background: #020617;
-  border-radius: 18px;
-  border: 1px solid rgba(148,163,184,0.7);
-  box-shadow: 0 28px 80px rgba(0,0,0,0.85);
-  color: #e5e7eb;
-}
-.modal-header {
-  padding: 14px 18px 8px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-}
-.modal-header h3 {
-  margin: 0;
-  font-size: 17px;
-}
-.modal-close {
-  background: none;
-  border: none;
-  color: #9ca3af;
-  font-size: 20px;
-  cursor: pointer;
-}
-.modal-body {
-  padding: 4px 18px 14px;
-}
-.form-row {
-  margin-bottom: 10px;
-}
-.form-row.two {
-  display: flex;
-  gap: 10px;
-}
-.form-row label {
-  display: block;
-  font-size: 12px;
-  margin-bottom: 4px;
-  color: #cbd5f5;
-}
-.form-row input,
-.form-row textarea {
-  width: 100%;
-  border-radius: 10px;
-  border: 1px solid rgba(148,163,184,0.7);
-  background: #020617;
-  color: #e5e7eb;
-  font-size: 13px;
-  padding: 7px 9px;
-  outline: none;
-}
-.form-row input:focus,
-.form-row textarea:focus {
-  border-color: #38bdf8;
-  box-shadow: 0 0 0 1px #0ea5e9;
-}
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 8px 18px 14px;
-}
-.modal-footer button {
-  border-radius: 999px;
-  border: none;
-  padding: 7px 14px;
-  font-size: 13px;
-  cursor: pointer;
-}
-.modal-footer .secondary {
-  background: rgba(15,23,42,0.9);
-  color: #e5e7eb;
-  border: 1px solid rgba(148,163,184,0.7);
-}
-.modal-footer .primary {
-  background: linear-gradient(135deg,#38bdf8,#6366f1);
-  color: white;
-  box-shadow: 0 14px 30px rgba(37,99,235,0.65);
+  justify-content: center;
 }
 
 /* =========================
-   RESPONSIVE – TABLET
+   RESPONSIVE
 ========================= */
-@media (max-width: 900px) {
-  #searchBar {
-    width: calc(100% - 150px);
-    top: 16px;
-    padding-inline: 12px;
+@media (max-width: 1024px) {
+  #addPanel {
+    top: 80px;
   }
 }
 
-/* =========================
-   RESPONSIVE – MOBILE / BOTTOM SHEET
-========================= */
+/* Mobile – bottom-sheet behaviour for addPanel and sidebar */
 @media (max-width: 768px) {
 
-  /* user chip & search alignment */
-  #userChip {
-    top: 10px;
-    right: 10px;
-    font-size: 11px;
-    padding: 4px 8px;
+  #topBar {
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
   #searchBar {
-    width: calc(100% - 40px);
-    top: 60px;
-    left: 50%;
-    transform: translateX(-50%);
+    order: 3;
+    width: 100%;
     max-width: none;
   }
 
-  /* sidebar becomes bottom sheet */
-  #sidebar {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: -60vh;    /* hidden by default */
+  /* Add panel -> bottom sheet */
+  #addPanel {
+    left: 50%;
     top: auto;
-    transform: none;
-    width: 100%;
-    max-height: 60vh;
-    height: 60vh;
-    border-radius: 20px 20px 0 0;
-    padding: 16px 18px 18px;
-    box-shadow: 0 -18px 50px rgba(0,0,0,0.85);
-  }
-
-  /* opened state (JS adds .open) */
-  #sidebar.open {
     bottom: 0;
+    transform: translate(-50%, 105%);
+    width: calc(100% - 24px);
+    max-width: 480px;
+    border-radius: 20px 20px 0 0;
   }
 
-  .mobile-handle {
-    display: block;
-    width: 50px;
-    height: 5px;
-    margin: 0 auto 12px;
+  #addPanel.collapsed {
+    transform: translate(-50%, 105%);
+    opacity: 0;
   }
 
-  #sidebar h2 {
-    font-size: 16px;
-    margin: 0 0 8px;
-    padding-left: 4px;
-  }
-
-  /* filters stacked, perfect alignment */
-  #filtersBar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    margin: 6px 0 10px;
-  }
-
-  #filtersBar input {
-    width: 100%;
-    padding: 8px 12px;
-    border-radius: 12px;
-    flex: none;
-  }
-
-  #toggleHeatmapBtn {
-    align-self: flex-end;
-    width: 40px;
-    height: 36px;
-    border-radius: 12px;
-    margin-top: 2px;
-  }
-
-  #bookCount {
-    margin-top: 2px;
-    margin-bottom: 6px;
-    font-size: 13px;
-    padding-left: 4px;
-  }
-
-  #bookList {
-    margin-top: 4px;
-    padding: 0 0 8px;
-  }
-
-  .book-card {
-    width: 100%;
-    padding: 10px;
-    border-radius: 16px;
-    margin-bottom: 12px;
-  }
-
-  .book-title {
-    font-size: 14px;
-  }
-
-  .book-author {
-    font-size: 12px;
-  }
-
-  .book-tags span {
-    font-size: 9px;
-    padding: 2px 6px;
-  }
-
-  /* FAB position relative to sheet */
-  #addBookBtn {
-    position: fixed;
-    right: 18px;
-    bottom: 24px;
-    transition: bottom 0.3s ease;
-  }
-
-  /* when sheet is open, move FAB above it */
-  #sidebar.open ~ #addBookBtn {
-    bottom: 62vh;
-  }
+  #addPanel:not(.collapsed) {
+    transform: translate(-50%, -20px);   /* 🔥 moves panel UP */
+    opacity: 1;
+    pointer-events: auto;
 }
 
-/* ultra-small phones tweaks */
-@media (max-width: 420px) {
-  #filtersBar {
-    gap: 6px;
-  }
-}
 
-/* =========================
-   CLEAN MOBILE LAYOUT
-========================= */
-@media (max-width: 768px) {
-
-  /* SIDEBAR = bottom sheet */
+  /* Sidebar -> smaller card above FAB (left) */
   #sidebar {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: -56vh;            /* hidden initially */
-      width: 100%;
-      height: 60vh;
-      max-height: 60vh;
-      transform: none;
-      border-radius: 20px 20px 0 0;
-      padding: 16px 18px 18px;
-      display: flex;
-      flex-direction: column;
-      background: radial-gradient(
-          circle at top left,
-          rgba(30,64,175,0.9),
-          rgba(15,23,42,0.97)
-      );
-      box-shadow: 0 -18px 50px rgba(0,0,0,0.85);
-      transition: bottom 0.35s ease;
+    top: auto;
+    bottom: 90px;
+    left: 12px;
+    width: calc(100% - 24px);
+    max-height: 220px;
+    border-radius: 18px;
   }
 
-  #sidebar.open {
-      bottom: 0;
+  #bookList {
+    max-height: 160px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar-filters {
+    flex-wrap: wrap;
   }
 
-  /* Drag handle */
-  .mobile-handle {
-      display: block;
-      width: 52px;
-      height: 5px;
-      background: rgba(255,255,255,0.35);
-      border-radius: 999px;
-      margin: 6px auto 14px;
-  }
-
-  #sidebar h2 {
-      font-size: 16px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-  }
-
-  /* FILTERS neatly stacked */
-  #filtersBar {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 10px;
-      margin: 4px 0 10px;
-  }
-
-  #filtersBar input {
-      width: 100%;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 13px;
+  .sidebar-filters input {
+    flex: 1 1 45%;
   }
 
   #toggleHeatmapBtn {
-      width: 42px;
-      height: 38px;
-      border-radius: 12px;
-      align-self: flex-end;
-      margin-top: 2px;
-  }
-
-  /* BOOK LIST */
-  #bookList {
-      flex: 1;
-      overflow-y: auto;
-      padding: 6px 0 14px;
-  }
-
-  /* BOOK CARD cleanup */
-  .book-card {
-      width: 100%;
-      padding: 12px;
-      border-radius: 16px;
-      margin-bottom: 12px;
-      display: flex;
-      flex-direction: column;
-  }
-
-  .book-card-inner {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-  }
-
-  .book-title {
-      font-size: 15px;
-      font-weight: 600;
-  }
-
-  .book-author {
-      font-size: 12px;
-  }
-
-  .book-tags span {
-      font-size: 9px;
-      padding: 2px 6px;
-  }
-
-  /* FAB position */
-  #addBookBtn {
-      position: fixed;
-      right: 18px;
-      bottom: 24px;
-      z-index: 999;
-      transition: bottom 0.35s ease;
-  }
-
-  #sidebar.open ~ #addBookBtn {
-      bottom: 62vh;
+    order: 3;
   }
 }
-
-#userChip {
-    position: absolute !important;
-    right: 10px !important;
-    top: 43px !important;
-    z-index: 2000 !important;
+#sidebar.hide {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-20px);
+    transition: opacity .25s ease, transform .25s ease;
 }
 
+/* Modern Neo Scrollbar */
+#bookList::-webkit-scrollbar {
+    width: 6px;
+}
+
+#bookList::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+}
+
+#bookList::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #38bdf8, #6366f1);
+    border-radius: 10px;
+    box-shadow: 0 0 6px rgba(99,102,241,0.7);
+}
+
+#bookList::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #60a5fa, #818cf8);
+}
+
+@media (max-width: 600px) {
+    #addPanel .add-panel-footer {
+        display: flex;
+        justify-content: center;
+    }
+
+    #addPanel .add-panel-footer .primary {
+        width: 70%;
+        margin-right: 0;
+    }
+}
+@media (max-width: 600px) {
+    #addPanel .add-panel-footer {
+        padding-bottom: 20px;
+    }
+}
+/*----------------------------------------------
+  MOBILE LAYOUT TWEAKS — move Earth up,
+  move book card down
+-----------------------------------------------*/
 @media (max-width: 768px) {
-    #userChip {
-        left: 15px !important;
-        right: auto !important;
-        padding: 4px 8px;
-        font-size: 11px;
-        transform: scale(0.92);
-        top: 20px !important;
+
+    /* Move the Earth upward */
+    #cesiumContainer canvas {
+        transform: translateY(-40px);   /* Move globe up */
+    }
+
+    /* Move book card (sidebar) downward */
+    #sidebar {
+        margin-top: 40px !important;    /* Push card down */
+    }
+
+    /* If using bottom-strip instead of sidebar */
+    #booksStrip {
+        margin-top: 40px !important;
+    }
+
+    /* Prevent overlap */
+    body {
+        padding-top: 20px;
+    }
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100dvh;  
+  overflow: hidden;
+  background: #000;
+}
+
+/* Cesium fix */
+#cesiumContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100dvh;
+}
+
+/* For iPhone bottom home bar */
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* --------------------------------------------------
+   MOBILE LAYOUT — MOVE GLOBE + SIDEBAR
+-------------------------------------------------- */
+@media (max-width: 768px) {
+
+    /* Move globe upward */
+    #cesiumContainer {
+        transform: translateY(-40px);
+    }
+
+    /* Move book card downward */
+    #sidebar {
+        bottom: 100px !important;
+    }
+
+    /* Prevent top overlap */
+    body {
+        padding-top: 20px;
     }
 }
 
-.custom-popup {
-    position: absolute;
-    z-index: 50000;
-    background: rgba(15,23,42,0.95);
-    border: 1px solid rgba(148,163,184,0.45);
-    border-radius: 16px;
-    padding: 14px 16px;
-    width: 260px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.75);
-    backdrop-filter: blur(10px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
+/* --------------------------------------------------
+   FULL VIEWPORT HEIGHT FIX (Remove bottom black bar)
+-------------------------------------------------- */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
 }
 
-.custom-popup.hidden {
-    display: none;
+/* Cesium should fill real viewport */
+#cesiumContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100dvh;
 }
 
-.popup-content {
-    position: relative;
-    color: #e5e7eb;
-    font-family: "Inter";
+/* Safe-area (iPhone Home Bar) */
+body {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-.popup-close {
-    position: absolute;
-    right: -4px;
-    top: -6px;
-    border: none;
-    background: transparent;
-    color: #e5e7eb;
-    font-size: 20px;
-    cursor: pointer;
+@media (max-width: 768px) {
+    #addBookFab {
+        top: 14px !important;
+        bottom: auto !important;
+        right: 14px !important;
+        position: fixed !important;
+        z-index: 50;
+    }
 }
 
-.popup-read-btn {
-    margin-top: 10px;
-    padding: 7px 12px;
-    background: linear-gradient(135deg,#38bdf8,#6366f1);
-    border-radius: 12px;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 13px;
+@media (max-width: 768px) {
+    #sidebar {
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        max-height: 250px !important;
+        border-radius: 20px 20px 0 0 !important;
+        box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
+    }
+
+    #bookList {
+        max-height: 180px !important;
+    }
+}
+@media (max-width: 768px) {
+    #addBookFab {
+        top: 14px !important;
+        right: 14px !important;
+        width: 42px !important;
+        height: 42px !important;
+        font-size: 16px !important;
+        box-shadow: 0 12px 28px rgba(22,163,74,0.45);
+    }
+}
+/* Base mobile bottom sheet */
+@media (max-width: 768px) {
+    #sidebar {
+        position: fixed !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-height: 230px !important; /* collapsed size */
+        border-radius: 20px 20px 0 0 !important;
+        transition: max-height 0.35s ease, transform 0.35s ease;
+        z-index: 45;
+    }
+
+    /* Expanded to 75% of screen */
+    #sidebar.expanded {
+        max-height: 75vh !important;
+    }
+
+    #bookList {
+        max-height: calc(100% - 60px) !important;
+    }
+
+    /* Drag handle */
+    #sidebar::before {
+        content: "";
+        width: 45px;
+        height: 5px;
+        background: rgba(255,255,255,0.4);
+        border-radius: 999px;
+        display: block;
+        margin: 8px auto 12px;
+    }
 }
