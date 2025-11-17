@@ -223,13 +223,51 @@ window.addEventListener("resize", () => {
 });
 
 /* ============================================================
+   HARD RESET VIEWER (Fix book mixing bug)
+============================================================ */
+function resetPdfViewer() {
+    console.log("RESETTING VIEWER…");
+
+    // Reset state
+    pdfDoc = null;
+    currentPage = 1;
+    totalPages = 1;
+
+    // Clear canvases
+    [canvasLeft, canvasRight].forEach(c => {
+        if (c) {
+            const ctx = c.getContext("2d");
+            ctx.clearRect(0, 0, c.width, c.height);
+        }
+    });
+
+    // Clear thumbnails
+    if (thumbContainer) {
+        thumbContainer.innerHTML = "";
+    }
+
+    // Hide right page (single mode default)
+    if (wrapperRight) {
+        wrapperRight.style.visibility = "hidden";
+    }
+
+    // Reset slider + labels
+    if (slider) slider.value = 1;
+    if (totalLabel) totalLabel.textContent = "--";
+    if (pageLabel) pageLabel.textContent = "1";
+}
+
+/* ============================================================
    LOAD PDF
 ============================================================ */
 if (typeof PDF_URL === "string" && window['pdfjsLib']) {
-    pdfjsLib.getDocument(PDF_URL).promise
-        .then(doc => {
-            pdfDoc = doc;
-            totalPages = doc.numPages;
+    resetPdfViewer();   // 🔥 FIX: clear old book completely
+
+pdfjsLib.getDocument(PDF_URL).promise
+    .then(doc => {
+        pdfDoc = doc;
+        totalPages = doc.numPages;
+
 
             totalLabel.textContent = totalPages;
             slider.max = totalPages;
