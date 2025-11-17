@@ -139,22 +139,25 @@ def add_book_with_pdf():
         # Try Cloudinary
         try:
             upload_result = cloudinary.uploader.upload(
-                pdf_file,
-                folder="bookmap/pdfs",
-                resource_type="raw",
-                use_filename=True,
-                unique_filename=False
-            )
-            pdf_url = upload_result.get("secure_url")
-        except Exception as e:
-            print("Cloudinary failed → using local:", e)
+              pdf_file,
+              folder="bookmap/pdfs",
+              resource_type="raw",
+              use_filename=False,
+              unique_filename=True,
+              overwrite=False
+           )
 
-            # Save locally
-            safe = secure_filename(pdf_file.filename)
-            unique = f"{datetime.utcnow().timestamp()}_{safe}"
-            local_path = os.path.join(app.config["UPLOAD_FOLDER"], unique)
-            pdf_file.save(local_path)
-            pdf_url = unique
+            pdf_url = upload_result["secure_url"]
+
+        except Exception as e:
+           print("Cloudinary failed → using local:", e)
+
+           safe = secure_filename(pdf_file.filename)
+           unique = f"{datetime.utcnow().timestamp()}_{safe}"
+           local_path = os.path.join(app.config["UPLOAD_FOLDER"], unique)
+           pdf_file.save(local_path)
+           pdf_url = unique
+
 
     if pdf_url:
         data["pdf_file"] = pdf_url
