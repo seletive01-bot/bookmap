@@ -9,9 +9,6 @@
   <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- Optional external CSS (if you still want it) -->
-  <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/reader.css') }}"> -->
-
   <!-- PDF.js Core -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
@@ -471,12 +468,10 @@
       max-width: 45vw;
       height: 6px;
       border-radius: 999px;
-      background: linear-gradient(
-        90deg,
-        rgba(37, 99, 235, 0.75),
-        rgba(56, 189, 248, 0.3),
-        rgba(148, 163, 184, 0.4)
-      );
+      background: linear-gradient(90deg,
+          rgba(37, 99, 235, 0.75),
+          rgba(56, 189, 248, 0.3),
+          rgba(148, 163, 184, 0.4));
       outline: none;
       cursor: pointer;
     }
@@ -641,62 +636,69 @@
         order: 2;
       }
     }
+
     /* FIX MOBILE THUMBNAIL CUTTING ISSUE */
-@media (max-width: 768px) {
+    @media (max-width: 768px) {
 
-  /* Increase space for thumbnail column */
-  .reader-shell {
-    margin-left: 90px !important;   /* was 12px */
-  }
+      /* Increase space for thumbnail column */
+      .reader-shell {
+        margin-left: 90px !important;
+        /* was 12px */
+      }
 
-  /* When collapsed */
-  .reader-shell.sidebar-collapsed {
-    margin-left: 12px !important;
-  }
+      /* When collapsed */
+      .reader-shell.sidebar-collapsed {
+        margin-left: 12px !important;
+      }
 
-  /* Reduce thumbnail width a bit */
-  .thumb-sidebar {
-    width: 85px !important;         /* was 90–110px */
-  }
+      /* Reduce thumbnail width a bit */
+      .thumb-sidebar {
+        width: 85px !important;
+        /* was 90–110px */
+      }
 
-  .thumb-page {
-    width: 75px !important;         /* scale thumbnails */
-  }
+      .thumb-page {
+        width: 75px !important;
+        /* scale thumbnails */
+      }
 
-  .thumb-page img {
-    width: 100%;
-    height: auto;
-  }
+      .thumb-page img {
+        width: 100%;
+        height: auto;
+      }
 
-  /* Make toggle button stay visible properly */
-  .thumb-toggle {
-    left: 85px !important;
-  }
-}
-/* FIX: Thumb Toggle Button Overlapping PDF Page on Mobile */
-@media (max-width: 768px) {
+      /* Make toggle button stay visible properly */
+      .thumb-toggle {
+        left: 85px !important;
+      }
+    }
 
-  .thumb-toggle {
-    position: fixed !important;
-    left: 0 !important;        /* Always stick to the true left edge */
-    transform: translate(0, -50%) !important;
-    z-index: 20000 !important; /* Make sure it stays above sidebar, but NOT above page */
-  }
+    /* FIX: Thumb Toggle Button Overlapping PDF Page on Mobile */
+    @media (max-width: 768px) {
 
-  /* When sidebar is expanded, move it slightly right */
-  .thumb-toggle.open {
-    left: 85px !important;
-  }
-}
-/* Increase page height in SINGLE-PAGE mode */
-.spread-shell.spread--single .page-canvas-wrap {
-    max-height: 95vh !important;
-}
+      .thumb-toggle {
+        position: fixed !important;
+        left: 0 !important;
+        /* Always stick to the true left edge */
+        transform: translate(0, -50%) !important;
+        z-index: 20000 !important;
+        /* Make sure it stays above sidebar, but NOT above page */
+      }
 
-.spread-shell.spread--single canvas {
-    max-height: 92vh !important;
-}
+      /* When sidebar is expanded, move it slightly right */
+      .thumb-toggle.open {
+        left: 85px !important;
+      }
+    }
 
+    /* Increase page height in SINGLE-PAGE mode */
+    .spread-shell.spread--single .page-canvas-wrap {
+      max-height: 95vh !important;
+    }
+
+    .spread-shell.spread--single canvas {
+      max-height: 92vh !important;
+    }
   </style>
 </head>
 
@@ -708,7 +710,8 @@
   </button>
 
   <!-- MAIN WRAPPER -->
-  <div class="reader-shell" id="readerShell">
+  <!-- ✅ FIX: add 'sidebar-collapsed' so initial state matches collapsed sidebar -->
+  <div class="reader-shell sidebar-collapsed" id="readerShell">
     <!-- SIDEBAR -->
     <aside class="thumb-sidebar collapsed" id="thumbSidebar" role="complementary" aria-label="Page thumbnails">
       <div class="thumb-scroll" id="thumbContainer"></div>
