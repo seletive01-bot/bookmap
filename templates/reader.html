@@ -17,7 +17,7 @@
        ROOT TOKENS (COLORS, RADII, SHADOWS)
     ============================================= */
     :root {
-      --bg-body: radial-gradient(circle at top, #0f172a, #020617 70%);
+      
       --bg-panel: rgba(15, 23, 42, 0.9);
       --bg-panel-softer: rgba(15, 23, 42, 0.75);
       --bg-book: #fdfdfc;
@@ -306,7 +306,7 @@
       align-items: stretch;
       padding: 32px 26px 40px;
       border-radius: var(--radius-xl);
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.9));
+      
       box-shadow: var(--shadow-soft);
     }
 
@@ -336,7 +336,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: radial-gradient(circle at 30% 10%, #ffffff, #f5f5f3);
+      background: #0b1220 !important;
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-book);
       max-height: var(--page-max-height);
@@ -748,6 +748,111 @@ body.fullpage-mode canvas {
   height: auto !important;
   width: 100% !important;
   max-height: none !important; 
+}
+/* FIX: Prevent buttons from overflowing the control bar */
+.controls-bar {
+  display: flex !important;      /* was inline-flex */
+  flex-wrap: wrap !important;    /* allows wrapping */
+  justify-content: center;
+  row-gap: 8px;                  /* spacing when wrapped */
+  max-width: 96vw;
+}
+
+/* Keep slider responsive */
+#pageSlider {
+  flex: 1 1 140px;
+  min-width: 120px;
+}
+
+body {
+  background: #0d172a !important;     /* one solid color */
+}
+
+.book-frame {
+  background: #0b1220 !important;
+
+    /* remove glowing border */
+}body,
+.reader-shell,
+.reader-main,
+.viewer-shell,
+.book-frame {
+  background: #0b1220 !important;
+}
+
+.page-left,
+.page-right {
+  background: #0b1220 !important;   /* same as body */
+  box-shadow: none !important;
+}
+
+
+/* Fix 1 — Make spread background same color */
+.spread-shell {
+  background: #0b1220 !important;
+}
+
+/* Fix 2 — Ensure book-frame uses same color */
+.book-frame {
+  background: #0b1220 !important;
+  box-shadow: none !important;
+}
+
+/* Fix 3 — Remove spine color difference */
+.book-spine {
+  background: #0b1220 !important;
+  box-shadow: none !important;
+}
+
+/* Fix 4 — Delete white gradient pages */
+.page-left,
+.page-right {
+  background: #0b1220 !important;
+  box-shadow: none !important;
+}
+
+/* Fix 5 — Canvas wrapper */
+.page-canvas-wrap {
+  background: #0b1220 !important;
+}
+
+/* === FINAL COLOR FIX — PLACE AT VERY BOTTOM === */
+
+html, body,
+.reader-shell,
+.reader-main,
+.viewer-shell,
+.book-frame,
+.spread-shell,
+.page-left,
+.page-right,
+.page-canvas-wrap,
+.book-spine {
+  background: #0b1220 !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Remove gradients from thumbnails collapsing edge */
+.thumb-sidebar {
+  background: #0b1220 !important;
+  border-right: none !important;
+  box-shadow: none !important;
+}
+
+/* Fix bottom area of control bar container */
+.controls-bar {
+  background: #0b1220 !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+/* === FIX: Restore glass look to bottom controls bar === */
+.controls-bar {
+  background: rgba(20, 30, 48, 0.72) !important;   /* Glassy dark blue */
+  border: 1px solid rgba(70, 95, 125, 0.45) !important;
+  backdrop-filter: blur(16px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
 }
 
 
