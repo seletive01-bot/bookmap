@@ -472,71 +472,85 @@ addBookFab.addEventListener("click", toggleAddPanel);
 addBookForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const form = new FormData(addBookForm);
-  const pdfFile = document.getElementById("pdf_file").files[0] || null;
+  const saveBtn = document.getElementById("saveBookBtn");
 
-  const title = (form.get("title") || "").trim();
-  const author = (form.get("author") || "").trim();
-  const year = form.get("year");
-  const category = (form.get("category") || "").trim();
-  const tagsRaw = (form.get("tags") || "").trim();
-  const cover_url = (form.get("cover_url") || "").trim();
-  const place = (form.get("place") || "").trim();
-  const description = (form.get("description") || "").trim();
+  // 🔥 START LOADING
+  saveBtn.classList.add("loading");
+  saveBtn.disabled = true;
 
-  if (!title || !author || !place) {
-    alert("Title, author and location are required.");
-    return;
-  }
+  try {
+    const form = new FormData(addBookForm);
+    const pdfFile = document.getElementById("pdf_file").files[0] || null;
 
-  const loc = await searchLocationByName(place);
-  if (!loc) {
-    alert("Could not find that place on the map.");
-    return;
-  }
+    const title = (form.get("title") || "").trim();
+    const author = (form.get("author") || "").trim();
+    const year = form.get("year");
+    const category = (form.get("category") || "").trim();
+    const tagsRaw = (form.get("tags") || "").trim();
+    const cover_url = (form.get("cover_url") || "").trim();
+    const place = (form.get("place") || "").trim();
+    const description = (form.get("description") || "").trim();
 
-  const tags = tagsRaw
-    ? tagsRaw.split(",").map((t) => t.trim()).filter(Boolean)
-    : [];
+    if (!title || !author || !place) {
+      alert("Title, author and location are required.");
+      return;
+    }
 
-  const payload = {
-    title,
-    author,
-    description: description || null,
-    year: year ? parseInt(year, 10) : null,
-    category: category || null,
-    tags,
-    cover_url: cover_url || null,
-    locations: [
-      {
-        geo: {
-          type: "Point",
-          coordinates: [loc.lng, loc.lat]
-        },
-        place_name: place,
-        country: ""
-      }
-    ]
-  };
+    const loc = await searchLocationByName(place);
+    if (!loc) {
+      alert("Could not find that place on the map.");
+      return;
+    }
 
-  const fd = new FormData();
-  fd.append("data", JSON.stringify(payload));
-  if (pdfFile) fd.append("pdf_file", pdfFile);
+    const tags = tagsRaw
+      ? tagsRaw.split(",").map((t) => t.trim()).filter(Boolean)
+      : [];
 
-  const res = await fetch("/api/book-with-pdf", {
-    method: "POST",
-    body: fd
-  });
+    const payload = {
+      title,
+      author,
+      description: description || null,
+      year: year ? parseInt(year, 10) : null,
+      category: category || null,
+      tags,
+      cover_url: cover_url || null,
+      locations: [
+        {
+          geo: {
+            type: "Point",
+            coordinates: [loc.lng, loc.lat]
+          },
+          place_name: place,
+          country: ""
+        }
+      ]
+    };
 
-  if (res.ok) {
-    addBookForm.reset();
-    closeAddPanel();
-    loadBooksInView();
-  } else {
-    const err = await res.json().catch(() => ({}));
-    alert("Failed to save book: " + (err.error || res.statusText));
+    const fd = new FormData();
+    fd.append("data", JSON.stringify(payload));
+    if (pdfFile) fd.append("pdf_file", pdfFile);
+
+    const res = await fetch("/api/book-with-pdf", {
+      method: "POST",
+      body: fd
+    });
+
+    if (res.ok) {
+      addBookForm.reset();
+      closeAddPanel();
+      loadBooksInView();
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert("Failed to save book: " + (err.error || res.statusText));
+    }
+
+  } finally {
+    // 🔥 STOP LOADING
+    saveBtn.classList.remove("loading");
+    saveBtn.disabled = false;
   }
 });
+
 
 const sidebar = document.getElementById("sidebar");
 
@@ -570,4 +584,3 @@ sidebar.addEventListener("click", function (e) {
 // =============================
 
 loadBooksInView();
-
