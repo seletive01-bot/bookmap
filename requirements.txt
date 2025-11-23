@@ -5,3 +5,4 @@ cloudinary
 dnspython
 Werkzeug
 gunicorn
+requests
