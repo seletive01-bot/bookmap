@@ -1,6 +1,8 @@
 import os
 import json
 from datetime import datetime
+from flask import Response
+import requests
 
 from flask import (
     Flask, request, jsonify, render_template,
@@ -34,6 +36,7 @@ books_col = db["books"]
 
 # GEO index
 books_col.create_index([("locations.geo", GEOSPHERE)])
+books_col.create_index([("created_at", -1)])   # ⭐ NEW: sort by newest
 
 # --------------------------------------------------
 # Cloudinary Config (PDF uploads)
@@ -59,7 +62,7 @@ def allowed_file(filename):
 
 
 # --------------------------------------------------
-# HOME PAGE (NO LOGIN)
+# HOME PAGE
 # --------------------------------------------------
 @app.route("/")
 def home():
@@ -67,7 +70,7 @@ def home():
 
 
 # --------------------------------------------------
-# PDF Serve + Reader Page
+# PDF Serve
 # --------------------------------------------------
 @app.route("/pdf/<path:filename>")
 def serve_pdf(filename):
@@ -96,7 +99,7 @@ def read_book(book_id):
 
 
 # --------------------------------------------------
-# API — Add Book (JSON Only)
+# API — Add Book (JSON)
 # --------------------------------------------------
 @app.route("/api/book", methods=["POST"])
 def add_book_json():
@@ -106,6 +109,8 @@ def add_book_json():
     for field in required:
         if field not in data:
             return jsonify({"error": f"{field} is required"}), 400
+
+    data["created_at"] = datetime.utcnow()   # ⭐ NEW
 
     books_col.insert_one(data)
     return jsonify({"status": "success"}), 201
@@ -136,38 +141,36 @@ def add_book_with_pdf():
         if not allowed_file(pdf_file.filename):
             return jsonify({"error": "Only PDF allowed"}), 400
 
-        # Try Cloudinary
         try:
             upload_result = cloudinary.uploader.upload(
-              pdf_file,
-              folder="bookmap/pdfs",
-              resource_type="raw",
-              use_filename=False,
-              unique_filename=True,
-              overwrite=False
-           )
-
+                pdf_file,
+                folder="bookmap/pdfs",
+                resource_type="raw",
+                use_filename=False,
+                unique_filename=True,
+                overwrite=False
+            )
             pdf_url = upload_result["secure_url"]
 
         except Exception as e:
-           print("Cloudinary failed → using local:", e)
-
-           safe = secure_filename(pdf_file.filename)
-           unique = f"{datetime.utcnow().timestamp()}_{safe}"
-           local_path = os.path.join(app.config["UPLOAD_FOLDER"], unique)
-           pdf_file.save(local_path)
-           pdf_url = unique
-
+            print("Cloudinary failed → using local:", e)
+            safe = secure_filename(pdf_file.filename)
+            unique = f"{datetime.utcnow().timestamp()}_{safe}"
+            local_path = os.path.join(app.config["UPLOAD_FOLDER"], unique)
+            pdf_file.save(local_path)
+            pdf_url = unique
 
     if pdf_url:
         data["pdf_file"] = pdf_url
+
+    data["created_at"] = datetime.utcnow()   # ⭐ NEW
 
     books_col.insert_one(data)
     return jsonify({"status": "success"}), 201
 
 
 # --------------------------------------------------
-# Format location data
+# Helper: format locations
 # --------------------------------------------------
 def normalize_locations(doc):
     out = []
@@ -230,25 +233,25 @@ def books_in_bbox():
 
 
 # --------------------------------------------------
-# API — Global Search
+# API — Global Search (Returns all books if q="")
 # --------------------------------------------------
 @app.route("/api/search", methods=["GET"])
 def search_books():
     q = request.args.get("q", "").strip()
-    if not q:
-        return jsonify({"books": []})
 
-    query = {
-        "$or": [
-            {"title": {"$regex": q, "$options": "i"}},
-            {"author": {"$regex": q, "$options": "i"}},
-            {"tags": {"$regex": q, "$options": "i"}},
-            {"category": {"$regex": q, "$options": "i"}},
-            {"description": {"$regex": q, "$options": "i"}},
-        ]
-    }
-
-    cursor = books_col.find(query).limit(150)
+    if q == "":
+        cursor = books_col.find().limit(250)   # ⭐ show all books when empty search
+    else:
+        query = {
+            "$or": [
+                {"title": {"$regex": q, "$options": "i"}},
+                {"author": {"$regex": q, "$options": "i"}},
+                {"tags": {"$regex": q, "$options": "i"}},
+                {"category": {"$regex": q, "$options": "i"}},
+                {"description": {"$regex": q, "$options": "i"}},
+            ]
+        }
+        cursor = books_col.find(query).limit(150)
 
     books = []
     for doc in cursor:
@@ -266,6 +269,42 @@ def search_books():
         })
 
     return jsonify({"books": books})
+
+
+# --------------------------------------------------
+# API — RECENTLY ADDED (NEW)
+# --------------------------------------------------
+@app.route("/api/recent", methods=["GET"])
+def recent_books():
+    cursor = books_col.find({}, sort=[("created_at", -1)]).limit(12)
+
+    books = []
+    for doc in cursor:
+        books.append({
+            "id": str(doc["_id"]),
+            "title": doc.get("title"),
+            "author": doc.get("author"),
+            "cover_url": doc.get("cover_url"),
+            "created_at": doc.get("created_at")
+        })
+
+    return jsonify({"books": books})
+
+
+# --------------------------------------------------
+# Cover Proxy
+# --------------------------------------------------
+@app.route("/cover-proxy")
+def cover_proxy():
+    url = request.args.get("url", "")
+    if not url:
+        return "Missing URL", 400
+
+    try:
+        img = requests.get(url, timeout=5)
+        return Response(img.content, mimetype="image/jpeg")
+    except:
+        return "Failed", 500
 
 
 # --------------------------------------------------
