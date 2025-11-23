@@ -3,27 +3,1089 @@
 <head>
   <meta charset="utf-8" />
   <title>BookMap – Explore Books by Location</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <!-- CesiumJS CSS -->
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 
-  <!-- Custom UI CSS -->
-  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    :root {
+      --bg-page: #f3f4f6;
+      --bg-panel: #ffffff;
+      --bg-subtle: #f9fafb;
+      --border-soft: #e5e7eb;
+      --border-strong: #d1d5db;
 
-  <!-- Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+      --accent: #2563eb;
+      --accent-soft: rgba(37, 99, 235, 0.08);
+      --accent-strong: #1d4ed8;
+
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --text-soft: #9ca3af;
+
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.08);
+      --shadow-subtle: 0 8px 20px rgba(15, 23, 42, 0.04);
+
+      --chip-bg: #f3f4ff;
+      --chip-text: #1d4ed8;
+    }
+
+    * ,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    /* =========================
+       TOP NAV
+    ========================== */
+
+    #topBar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 20px;
+      background: rgba(249, 250, 251, 0.9);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: conic-gradient(from 210deg, #2563eb, #22c55e, #f97316, #2563eb);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.16);
+    }
+
+    .brand-mark-inner {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #f9fafb;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Search bar */
+
+    #searchBar {
+      flex: 1;
+      max-width: 560px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      border: 1px solid var(--border-soft);
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+    }
+
+    #searchBar i {
+      color: var(--text-soft);
+      font-size: 13px;
+    }
+
+    #searchBar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 14px;
+    }
+
+    #searchBar input::placeholder {
+      color: var(--text-soft);
+    }
+
+    /* Top add button */
+
+    .top-add-btn {
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(37, 99, 235, 0.16);
+      background: linear-gradient(to right, #ffffff, #eef2ff);
+      color: var(--text-main);
+      padding: 7px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: var(--shadow-subtle);
+      transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+      white-space: nowrap;
+    }
+
+    .top-add-btn i {
+      font-size: 13px;
+      color: var(--accent);
+    }
+
+    .top-add-btn:hover {
+      background: linear-gradient(to right, #eef2ff, #e0ecff);
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.18);
+      transform: translateY(-1px);
+    }
+
+    /* =========================
+       LAYOUT
+    ========================== */
+
+    #pageShell {
+      max-width: 1340px;
+      margin: 14px auto 30px;
+      padding: 0 16px 20px;
+    }
+
+    #layoutMain {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    /* Map panel */
+
+    #mapSection {
+      border-radius: 22px;
+      background: #ffffff;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border-soft);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 340px;
+      transition: height 0.25s ease, box-shadow 0.18s ease, transform 0.12s ease;
+    }
+
+    #mapSection-header {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #edf0f3;
+      background: linear-gradient(to bottom, #f9fafb, #ffffff);
+    }
+
+    #mapSection-title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    #mapSection-title span:first-child {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    #mapSection-title span:last-child {
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    .map-header-chip {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #0369a1;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid #bae6fd;
+    }
+
+    #cesiumContainer {
+      width: 100%;
+      height: clamp(260px, 52vh, 520px);
+    }
+
+    /* Right panel */
+
+    #booksSection {
+      border-radius: 22px;
+      background: var(--bg-panel);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border-soft);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 340px;
+      transition: box-shadow 0.18s ease, transform 0.12s ease;
+    }
+
+    #booksSection-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid #edf0f3;
+      background: linear-gradient(to bottom, #fafafa, #ffffff);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .sidebar-heading {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .sidebar-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .sidebar-title-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #e5edff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #1d4ed8;
+      font-size: 12px;
+    }
+
+    .sidebar-sub {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    #bookCount {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Filters */
+
+    .sidebar-filters {
+      padding: 10px 14px 8px;
+      background: #f9fafb;
+      border-bottom: 1px solid #edf0f3;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr auto;
+      gap: 8px;
+    }
+
+    .sidebar-filters input {
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: #ffffff;
+      color: var(--text-main);
+      padding: 6px 10px;
+      font-size: 12.5px;
+      outline: none;
+      box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.08);
+      transition: border 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .sidebar-filters input::placeholder {
+      color: var(--text-soft);
+    }
+
+    .sidebar-filters input:focus {
+      border-color: rgba(37, 99, 235, 0.6);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.18);
+    }
+
+    #toggleHeatmapBtn {
+      border-radius: 999px;
+      border: 1px solid #fecaca;
+      background: #fef2f2;
+      color: #b91c1c;
+      font-size: 12px;
+      padding: 0 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-width: 0;
+      box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.08);
+      transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    #toggleHeatmapBtn i {
+      font-size: 11px;
+    }
+
+    #toggleHeatmapBtn.active {
+      background: #fee2e2;
+      border-color: #f97373;
+      box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.28);
+    }
+
+    /* Books list */
+
+    #bookList {
+      flex: 1;
+      padding: 12px 14px 14px;
+      overflow-y: auto;
+      background: var(--bg-panel);
+    }
+
+    #bookList::-webkit-scrollbar {
+      width: 7px;
+    }
+
+    #bookList::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 999px;
+    }
+
+    #bookList::-webkit-scrollbar-track {
+      background: #f3f4f6;
+    }
+
+    #bookList.book-grid {
+      display: grid;
+       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+    }
+
+    .book-card {
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-subtle);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+  max-width: 150px;
+}
+
+
+    .book-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+      border-color: #d1d5db;
+    }
+
+    .book-cover {
+  width: 100%;
+  height: 220px;                 /* Increased height */
+  background-size: cover;
+  background-position: top;      /* Shows the TOP of the cover */
+  background-repeat: no-repeat;
+  background-color: #e5e7eb;
+  border-bottom: 1px solid #f1f5f9; /* Optional: nice Apple-style divider */
+}
+
+
+    .book-body {
+        padding: 6px 8px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .book-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #111827;
+      line-height: 1.2;
+      max-height: 2.6em;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .book-author {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .book-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+    .book-location-chip {
+        font-size: 9.8px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: var(--chip-bg);
+      color: var(--chip-text);
+      max-width: 70%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .book-read-btn {
+      font-size: 10px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(37, 99, 235, 0.16);
+      background: #eef2ff;
+      color: #1d4ed8;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      box-shadow: 0 0 0 1px rgba(191, 219, 254, 0.6);
+    }
+
+    .book-read-btn i {
+      font-size: 11px;
+    }
+
+    .book-read-btn:hover {
+      background: #e0e7ff;
+    }
+
+    /* =========================
+       ADD BOOK PANEL (SHEET)
+    ========================== */
+
+    #addPanel {
+      position: fixed;
+      top: 64px;
+      right: 0;
+      width: min(420px, 100%);
+      height: calc(100vh - 64px);
+      background: #ffffff;
+      border-left: 1px solid var(--border-soft);
+      box-shadow: -18px 0 38px rgba(15, 23, 42, 0.14);
+      transform: translateX(100%);
+      transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #addPanel.open {
+      transform: translateX(0);
+    }
+
+    .add-panel-header {
+      padding: 12px 16px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: linear-gradient(to bottom, #f9fafb, #ffffff);
+    }
+
+    .add-panel-header h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .add-panel-header p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    #addPanelToggle {
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      color: var(--text-muted);
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    #addPanelToggle:hover {
+      background: #f3f4f6;
+    }
+
+    .add-panel-form {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 16px 14px;
+      background: #f9fafb;
+    }
+
+    .add-panel-form::-webkit-scrollbar {
+      width: 7px;
+    }
+
+    .add-panel-form::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 999px;
+    }
+
+    .form-row {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-row.two {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .form-row label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .form-row input,
+    .form-row textarea {
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 13px;
+      padding: 7px 8px;
+      outline: none;
+      box-shadow: 0 1px 0 rgba(148, 163, 184, 0.06);
+      resize: vertical;
+      transition: border 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .form-row input::placeholder,
+    .form-row textarea::placeholder {
+      color: var(--text-soft);
+    }
+
+    .form-row input:focus,
+    .form-row textarea:focus {
+      border-color: rgba(37, 99, 235, 0.6);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.22);
+      background: #ffffff;
+    }
+
+    .add-panel-footer {
+      padding: 10px 16px 14px;
+      border-top: 1px solid #e5e7eb;
+      background: #ffffff;
+    }
+
+    #saveBookBtn {
+      border-radius: 999px;
+      border: 1px solid rgba(37, 99, 235, 0.2);
+      background: linear-gradient(to right, #2563eb, #1d4ed8);
+      color: #ffffff;
+      font-size: 14px;
+      padding: 7px 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 16px 32px rgba(37, 99, 235, 0.4);
+      min-width: 140px;
+      justify-content: center;
+      transition: box-shadow 0.12s ease, transform 0.1s ease, opacity 0.12s ease;
+    }
+
+    #saveBookBtn:hover {
+      box-shadow: 0 18px 38px rgba(37, 99, 235, 0.5);
+      transform: translateY(-1px);
+    }
+
+    #saveBookBtn.loading {
+      opacity: 0.8;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+
+    #saveBookBtn .btn-loader {
+      display: none;
+    }
+
+    #saveBookBtn.loading .btn-loader {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #ffffff;
+      animation: spin 0.7s linear infinite;
+    }
+
+    #saveBookBtn.loading .btn-text {
+      opacity: 0.6;
+    }
+
+    /* FAB (mobile add button) */
+
+    #addBookFab {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+      border: none;
+      background: #2563eb;
+      color: #ffffff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 18px 36px rgba(37, 99, 235, 0.5);
+      z-index: 35;
+      font-size: 18px;
+    }
+
+    #addBookFab:hover {
+      background: #1d4ed8;
+    }
+
+    /* =========================
+       POPUP
+    ========================== */
+
+    .custom-popup {
+      position: fixed;
+      pointer-events: none;
+      z-index: 32;
+    }
+
+    .custom-popup.hidden {
+      display: none;
+    }
+
+    .popup-content {
+      min-width: 250px;
+      max-width: 280px;
+      border-radius: 16px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+      padding: 10px 12px 12px;
+      pointer-events: auto;
+    }
+
+    .popup-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .popup-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .popup-close {
+      border: none;
+      background: transparent;
+      color: var(--text-soft);
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .popup-body {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: grid;
+      gap: 3px;
+    }
+
+    .popup-read-btn {
+      margin-top: 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(37, 99, 235, 0.2);
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: 12px;
+      padding: 5px 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .popup-read-btn i {
+      font-size: 11px;
+    }
+
+    /* =========================
+       ANIMATIONS
+    ========================== */
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* When sheet open, shrink map a bit & hide right panel on mobile */
+    #mapSection.map-mini #cesiumContainer {
+      height: 40vh;
+    }
+
+    #booksSection.hide {
+      display: none;
+    }
+
+    /* =========================
+   NEW GRID LAYOUT (DESKTOP)
+========================= */
+
+#layoutMain {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr; /* left map | right recently added */
+  grid-template-rows: auto auto;    /* row1: map + recent, row2: books */
+  grid-template-areas:
+    "map recent"
+    "books books";
+  gap: 18px;
+}
+
+#mapSection {
+  grid-area: map;
+}
+
+#booksSection {
+  grid-area: books;
+}
+
+/* ===============================================
+   RECENTLY ADDED — PREMIUM MINI BOOK CARDS
+================================================ */
+
+#recentlyAddedSection {
+  grid-area: recent;
+  margin-top: 22px;
+  padding: 0 6px 10px;
+}
+
+.recent-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-left: 6px;
+}
+
+/* -------- Clean responsive slider -------- */
+.recent-slider {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  scroll-behavior: smooth;
+  padding-bottom: 12px;
+  width: 100%;
+  scroll-snap-type: x mandatory;
+}
+
+.recent-slider::-webkit-scrollbar { height: 6px; }
+.recent-slider::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+/* -------- Card -------- */
+.recent-card {
+  min-width: 160px;
+  max-width: 160px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  transition: 0.2s ease;
+  cursor: pointer;
+  scroll-snap-align: start;
+}
+
+.recent-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+}
+
+.recent-cover {
+  height: 200px;
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+}
+
+.recent-body {
+  padding: 10px;
+}
+
+.recent-title-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.3;
+  max-height: 2.6em;
+  overflow: hidden;
+}
+
+.recent-author {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 3px;
+}
+
+/* -------- (Optional) Meta row -------- */
+.recent-meta {
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recent-chip {
+  font-size: 10px;
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #1d4ed8;
+}
+
+.recent-read-btn {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(37,99,235,0.16);
+  background: #eef2ff;
+  color: #1d4ed8;
+}
+
+/* =========================
+   MOBILE LAYOUT (STACK)
+========================= */
+
+@media (max-width: 768px) {
+  #layoutMain {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "map"
+      "recent"
+      "books";
+  }
+
+  #recentlyAddedSection {
+    margin-top: 18px;
+  }
+}
+
+/* =========================
+   RESPONSIVE CARD COUNT
+========================= */
+
+/* Tablet (≤900px) — show 2–3 cards naturally */
+@media (max-width: 900px) {
+  .recent-card {
+    min-width: 150px;
+    max-width: 150px;
+  }
+}
+
+/* Large Mobile (≤640px) — show 2 cards */
+@media (max-width: 640px) {
+  .recent-card {
+    min-width: 140px;
+    max-width: 140px;
+  }
+}
+
+/* Small Mobile (≤480px) — show 2–3 small cards */
+@media (max-width: 480px) {
+  .recent-card {
+    min-width: 120px;
+    max-width: 120px;
+  }
+
+  .recent-cover {
+    height: 150px;
+  }
+
+  .recent-slider {
+    gap: 10px;
+    padding-left: 6px;
+  }
+}
+
+/* =========================
+   FIX RECENTLY ADDED SCROLL
+========================= */
+
+#recentlyAddedSection {
+  width: 100%;
+  overflow: hidden;
+}
+
+.recent-slider {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  padding: 4px 6px 12px;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  scroll-snap-type: x mandatory;
+}
+
+.recent-slider::-webkit-scrollbar { height: 6px; }
+.recent-slider::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+.recent-card {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+/* ===============================================
+   TOP BAR MOBILE FIX
+   Prevent brand name from cutting
+================================================ */
+
+@media (max-width: 500px) {
+  #topBar {
+    flex-wrap: wrap;          /* Allow items to move to next line */
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .brand {
+    flex: 1 1 100%;           /* Take full width */
+  }
+
+  #searchBar {
+    flex: 1 1 100%;           /* Full width on mobile */
+    max-width: 100%;
+  }
+
+  #topAddBtn {
+    font-size: 12px;
+    padding: 6px 10px;
+    flex-shrink: 0;
+  }
+}
+/* =====================================================
+   FIX: MAKE ALL BOOK CARDS EQUAL HEIGHT & ALIGN BUTTONS
+===================================================== */
+
+/* Set a fixed height (tune as you like) */
+.book-card {
+    display: flex;
+    flex-direction: column;
+    height: 320px;   /* NEW: equal card height */
+}
+
+/* Fix cover height */
+.book-cover {
+    height: 220px;
+    flex-shrink: 0;
+}
+
+/* Body must expand to fill remaining space */
+.book-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;            /* expands to fill height */
+}
+
+/* Title + Author normal behavior */
+.book-title,
+.book-author {
+    flex-shrink: 0;
+}
+
+/* Push meta row (Read button + chip) to bottom */
+.book-meta {
+    margin-top: auto;   /* THIS aligns all buttons */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+  </style>
 </head>
 
 <body>
-  <!-- 3D Earth (background) -->
-  <div id="cesiumContainer"></div>
 
-  <!-- Top bar -->
+  <!-- TOP NAV BAR -->
   <header id="topBar">
     <div class="brand">
-  
+      <div class="brand-mark">
+        <div class="brand-mark-inner"></div>
+      </div>
       <div class="brand-text">
         <span class="brand-title">BookMap</span>
         <span class="brand-sub">Explore books by location</span>
@@ -33,23 +1095,86 @@
     <div id="searchBar">
       <i class="fa fa-search"></i>
       <input id="globalSearch" type="text"
-             placeholder="Search books, authors, tags or places..."
-             autocomplete="off">
+             placeholder="Search by title, author, tags or place…" autocomplete="off">
     </div>
 
-    
+    <button id="topAddBtn" type="button" class="top-add-btn">
+      <i class="fa fa-plus"></i><span>Add book</span>
+    </button>
   </header>
 
-  <!-- Left: Add Book panel (slides up on desktop & mobile) -->
-  <aside id="addPanel" class="collapsed">
+  <!-- MAIN LAYOUT -->
+  <main id="pageShell">
+    <section id="layoutMain">
+      <!-- LEFT: MAP -->
+      <section id="mapSection">
+        <div id="mapSection-header">
+          <div id="mapSection-title">
+            <span>World Map</span>
+            <span>Move & zoom to load books in view</span>
+          </div>
+          <div class="map-header-chip">
+            <i class="fa fa-globe"></i><span>3D Globe</span>
+          </div>
+        </div>
+        <div id="cesiumContainer"></div>
+      </section>
+
+
+
+
+
+      <!-- RIGHT: BOOKS -->
+      <section id="booksSection">
+        <div id="booksSection-header">
+          <div class="sidebar-heading">
+            <div class="sidebar-title-row">
+              <div class="sidebar-title-icon">
+                <i class="fa fa-book"></i>
+              </div>
+              <span>Books in Area</span>
+            </div>
+            <span class="sidebar-sub">Books visible inside the current map view</span>
+          </div>
+          <span id="bookCount">0 books</span>
+        </div>
+
+        <div class="sidebar-filters">
+          <input id="tagFilter" type="text" placeholder="Filter by tag…">
+          <input id="categoryFilter" type="text" placeholder="Filter by category…">
+          <button id="toggleHeatmapBtn" type="button" title="Toggle heatmap">
+            <i class="fa fa-fire"></i><span>Heat</span>
+          </button>
+        </div>
+
+        <div id="bookList" class="book-grid"></div>
+      </section>
+
+      <section id="recentlyAddedSection" class="grid-recent">
+  <div class="recent-header">
+    <i class="fa fa-clock recent-icon"></i>
+    <span class="recent-title">Recently Added</span>
+  </div>
+
+  <div id="recentSlider" class="recent-slider"></div>
+</section>
+
+    </section>
+
+
+
+    
+  </main>
+
+  <!-- ADD BOOK PANEL (SLIDE IN) -->
+  <aside id="addPanel">
     <div class="add-panel-header">
       <div>
-        <h2>Add a Book</h2>
-        <p>Pin a book to a real-world location.</p>
+        <h2>Add a book</h2>
+        <p>Attach a book to a real-world place.</p>
       </div>
       <button id="addPanelToggle" type="button">
-        <i class="fa fa-plus"></i>
-        <span>Add Book</span>
+        <i class="fa fa-xmark"></i>
       </button>
     </div>
 
@@ -58,10 +1183,12 @@
         <label>Title</label>
         <input name="title" required />
       </div>
+
       <div class="form-row">
         <label>Author</label>
         <input name="author" required />
       </div>
+
       <div class="form-row two">
         <div>
           <label>Year</label>
@@ -69,78 +1196,63 @@
         </div>
         <div>
           <label>Category</label>
-          <input name="category" placeholder="Fantasy, History…" />
+          <input name="category" placeholder="Fantasy, history, travel…" />
         </div>
       </div>
+
       <div class="form-row">
         <label>Tags (comma separated)</label>
         <input name="tags" placeholder="magic, novel, classic" />
       </div>
+
       <div class="form-row">
         <label>Cover image URL</label>
         <input name="cover_url" placeholder="https://…" />
       </div>
+
       <div class="form-row">
-        <label>PDF File</label>
+        <label>PDF file</label>
         <input type="file" name="pdf_file" id="pdf_file" accept="application/pdf" />
       </div>
+
       <div class="form-row">
         <label>Location name (city, place…)</label>
         <input name="place" placeholder="Chennai, Dubai, London…" required />
       </div>
+
       <div class="form-row">
         <label>Description</label>
         <textarea name="description" rows="3" placeholder="Short description…"></textarea>
       </div>
-
-      <div class="add-panel-footer">
-        <button id="saveBookBtn" class="primary">
-    <span class="btn-text">Save book</span>
-    <span class="btn-loader"></span>
-</button>
-
-      </div>
     </form>
-  </aside>
 
-  <!-- Left Sidebar – vertical Books list -->
-  <aside id="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-title">
-        <i class="fa fa-book"></i>
-        <span>Books in Area</span>
-      </div>
-      <span id="bookCount">0 books</span>
-    </div>
-
-    <div class="sidebar-filters">
-      <input id="tagFilter" type="text" placeholder="Filter by tag…" />
-      <input id="categoryFilter" type="text" placeholder="Category…" />
-      <button id="toggleHeatmapBtn" type="button" title="Toggle heatmap">
-        <i class="fa fa-fire"></i>
+    <div class="add-panel-footer">
+      <button id="saveBookBtn" type="submit" form="addBookForm">
+        <span class="btn-text">Save book</span>
+        <span class="btn-loader"></span>
       </button>
     </div>
-
-    <!-- JS fills this -->
-    <div id="bookList"></div>
   </aside>
 
-  <!-- Bottom-right FAB to open Add Book panel -->
+  <!-- FLOATING ADD BUTTON (MOBILE) -->
   <button id="addBookFab" title="Add book">
     <i class="fa fa-plus"></i>
   </button>
 
-  <!-- Custom popup near markers -->
+  <!-- POPUP -->
   <div id="bookPopup" class="custom-popup hidden">
     <div class="popup-content">
-      <button id="bookPopupClose" class="popup-close">×</button>
-      <h3 id="ppTitle"></h3>
-      <p id="ppAuthor"></p>
-      <p id="ppYear"></p>
-      <p id="ppLocation"></p>
-
+      <div class="popup-header">
+        <h3 id="ppTitle" class="popup-title"></h3>
+        <button id="bookPopupClose" class="popup-close">&times;</button>
+      </div>
+      <div class="popup-body">
+        <span id="ppAuthor"></span>
+        <span id="ppYear"></span>
+        <span id="ppLocation"></span>
+      </div>
       <button id="ppReadBtn" class="popup-read-btn">
-        📖 Read Book
+        <i class="fa fa-book-open"></i><span>Read book</span>
       </button>
     </div>
   </div>
@@ -148,7 +1260,634 @@
   <!-- CesiumJS -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
 
-  <!-- Custom JS -->
-  <script src="/static/js/main.js"></script>
+  <!-- APP JS -->
+  <script>
+    /* =======================================================
+       CESIUM SETUP
+    ======================================================= */
+
+    Cesium.Ion.defaultAccessToken = null;  // using custom providers, no Ion assets
+
+    const terrainProvider = new Cesium.EllipsoidTerrainProvider();
+    const imageryProvider = new Cesium.UrlTemplateImageryProvider({
+      url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+    });
+
+    const viewer = new Cesium.Viewer("cesiumContainer", {
+      animation: false,
+      timeline: false,
+      geocoder: false,
+      baseLayerPicker: false,
+      sceneModePicker: false,
+      fullscreenButton: true,
+      terrainProvider,
+      shadows: false
+    });
+
+    // Replace default imagery + hide credits
+    viewer.imageryLayers.removeAll();
+    viewer.imageryLayers.addImageryProvider(imageryProvider);
+    viewer._cesiumWidget._creditContainer.style.display = "none";
+
+    // A bit of lighting / atmosphere
+    viewer.scene.globe.enableLighting = false;
+    viewer.scene.globe.showGroundAtmosphere = true;
+
+    // Disable default popups
+    if (viewer.infoBox) viewer.infoBox.container.style.display = "none";
+    if (viewer.selectionIndicator) viewer.selectionIndicator.viewModel.showSelection = false;
+
+    /* =======================================================
+       DATA SOURCE + CLUSTERING
+    ======================================================= */
+
+    const bookSource = new Cesium.CustomDataSource("books");
+    viewer.dataSources.add(bookSource);
+
+    bookSource.clustering.enabled = true;
+    bookSource.clustering.pixelRange = 18;
+    bookSource.clustering.minimumClusterSize = 5;
+
+    let heatEntities = [];
+    let heatmapEnabled = false;
+    let lastBooks = [];
+    const entityBookMap = new Map();
+
+    /* =======================================================
+       HELPERS
+    ======================================================= */
+
+    function openReader(id) {
+      window.location.href = "/book/" + id;
+    }
+    window.openReader = openReader;
+
+    function fixCoverUrl(url) {
+      if (!url || !url.trim()) return "/static/default_cover.png";
+      if (url.startsWith("http")) {
+        return "/cover-proxy?url=" + encodeURIComponent(url);
+      }
+      return url;
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function loadImageAsync(url) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = url;
+      });
+    }
+
+    const markerCache = new Map();
+
+    async function getBookMarkerImage(url) {
+      if (markerCache.has(url)) return markerCache.get(url);
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 56;
+      canvas.height = 84;
+      const ctx = canvas.getContext("2d");
+
+      // Card background
+      ctx.fillStyle = "#ffffff";
+      roundRect(ctx, 0, 0, 56, 72, 10);
+      ctx.fill();
+
+      // Shadow bottom pointer
+      ctx.fillStyle = "rgba(15, 23, 42, 0.12)";
+      ctx.beginPath();
+      ctx.moveTo(28, 72);
+      ctx.lineTo(20, 84);
+      ctx.lineTo(36, 84);
+      ctx.closePath();
+      ctx.fill();
+
+      const img = await loadImageAsync(url);
+      if (img) {
+        ctx.save();
+        roundRect(ctx, 4, 4, 48, 64, 8);
+        ctx.clip();
+        ctx.drawImage(img, 4, 4, 48, 64);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = "#e5e7eb";
+        roundRect(ctx, 4, 4, 48, 64, 8);
+        ctx.fill();
+        ctx.fillStyle = "#9ca3af";
+        ctx.font = "26px system-ui";
+        ctx.fillText("📘", 16, 42);
+      }
+
+      const dataUrl = canvas.toDataURL("image/png");
+      markerCache.set(url, dataUrl);
+      return dataUrl;
+    }
+
+    /* =======================================================
+       NOMINATIM GEOCODER
+    ======================================================= */
+
+    async function searchLocationByName(q) {
+      if (!q) return null;
+
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`;
+      const res = await fetch(url, {
+        headers: { "User-Agent": "BookMap-Education" }
+      }).catch(() => null);
+
+      if (!res || !res.ok) return null;
+      const data = await res.json();
+      if (!data.length) return null;
+
+      const b = data[0];
+      const bb = b.boundingbox;
+
+      return {
+        lat: parseFloat(b.lat),
+        lng: parseFloat(b.lon),
+        bbox: {
+          south: parseFloat(bb[0]),
+          north: parseFloat(bb[1]),
+          west: parseFloat(bb[2]),
+          east: parseFloat(bb[3])
+        }
+      };
+    }
+
+    /* =======================================================
+       FILTERS
+    ======================================================= */
+
+    let activeTagFilter = "";
+    let activeCategoryFilter = "";
+
+    function applyFilters(books) {
+      return books.filter(b => {
+        if (activeCategoryFilter) {
+          const cat = (b.category || "").toLowerCase();
+          if (!cat.includes(activeCategoryFilter)) return false;
+        }
+        if (activeTagFilter) {
+          const tags = (b.tags || []).map(t => String(t).toLowerCase());
+          if (!tags.some(t => t.includes(activeTagFilter))) return false;
+        }
+        return true;
+      });
+    }
+
+    /* =======================================================
+       LOAD BOOKS IN VIEW
+    ======================================================= */
+
+    let moveEndTimer = null;
+
+    viewer.camera.moveEnd.addEventListener(() => {
+      clearTimeout(moveEndTimer);
+      moveEndTimer = setTimeout(loadBooksInView, 260);
+    });
+
+    viewer.camera.moveStart.addEventListener(hidePopup);
+
+    async function loadBooksInView() {
+      const rect = viewer.camera.computeViewRectangle();
+      if (!rect) return;
+
+      const pad = Cesium.Math.toRadians(2);
+      const west = Cesium.Math.toDegrees(rect.west - pad);
+      const south = Cesium.Math.toDegrees(rect.south - pad);
+      const east = Cesium.Math.toDegrees(rect.east + pad);
+      const north = Cesium.Math.toDegrees(rect.north + pad);
+
+      const res = await fetch(
+        `/api/books-in-bbox?min_lng=${west}&min_lat=${south}&max_lng=${east}&max_lat=${north}`
+      ).catch(() => null);
+      if (!res || !res.ok) return;
+
+      const data = await res.json();
+      lastBooks = data.books || [];
+
+      const filtered = applyFilters(lastBooks);
+      renderBooks(filtered);
+      renderMarkers(filtered);
+      rebuildHeatmap(filtered);
+    }
+
+    /* =======================================================
+       RENDER MARKERS
+    ======================================================= */
+
+    async function renderMarkers(books) {
+      bookSource.entities.removeAll();
+      entityBookMap.clear();
+
+      for (const b of books) {
+        const safeCover = fixCoverUrl(b.cover_url);
+        const markerImage = await getBookMarkerImage(safeCover);
+
+        for (const loc of (b.locations || [])) {
+          const entity = bookSource.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(loc.lng, loc.lat),
+            billboard: {
+    image: markerImage,
+    width: 60,
+    height: 90,
+
+    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+    pixelOffset: new Cesium.Cartesian2(0, -12),
+    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+    disableDepthTestDistance: Number.POSITIVE_INFINITY,
+    distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 2000000000)
+},
+            label: { show: false }
+          });
+
+          entityBookMap.set(entity, { book: b, loc });
+        }
+      }
+    }
+
+    /* =======================================================
+       HEATMAP
+    ======================================================= */
+
+    function rebuildHeatmap(books) {
+      heatEntities.forEach(e => viewer.entities.remove(e));
+      heatEntities = [];
+
+      if (!heatmapEnabled) return;
+
+      books.forEach(b => {
+        (b.locations || []).forEach(loc => {
+          const entity = viewer.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(loc.lng, loc.lat),
+            ellipse: {
+              semiMinorAxis: 220000,
+              semiMajorAxis: 220000,
+              material: Cesium.Color.fromCssColorString("#f97373").withAlpha(0.22),
+              height: 0
+            }
+          });
+          heatEntities.push(entity);
+        });
+      });
+    }
+
+    const heatBtn = document.getElementById("toggleHeatmapBtn");
+    heatBtn.addEventListener("click", () => {
+      heatmapEnabled = !heatmapEnabled;
+      heatBtn.classList.toggle("active", heatmapEnabled);
+      rebuildHeatmap(applyFilters(lastBooks));
+    });
+
+    /* =======================================================
+       POPUP
+    ======================================================= */
+
+    const popupEl = document.getElementById("bookPopup");
+    const popupCloseBtn = document.getElementById("bookPopupClose");
+
+    function showPopup(book, position) {
+      popupEl.classList.remove("hidden");
+
+      document.getElementById("ppTitle").textContent = book.title || "Untitled";
+      document.getElementById("ppAuthor").textContent = "Author: " + (book.author || "Unknown");
+
+      document.getElementById("ppYear").textContent =
+        "Year: " + (book.year ? book.year : "—");
+
+      const loc = (book.locations || [])[0];
+      document.getElementById("ppLocation").textContent =
+        "Location: " + (loc?.place_name || "Unknown");
+
+      const readBtn = document.getElementById("ppReadBtn");
+      if (book.pdf_file) {
+        readBtn.style.display = "inline-flex";
+        readBtn.onclick = () => openReader(book.id);
+      } else {
+        readBtn.style.display = "none";
+        readBtn.onclick = null;
+      }
+
+      const win = Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, position);
+      if (win) {
+        popupEl.style.left = (win.x - 140) + "px";
+        popupEl.style.top = (win.y - 160) + "px";
+      }
+    }
+
+    function hidePopup() {
+      popupEl.classList.add("hidden");
+    }
+
+    popupCloseBtn.addEventListener("click", hidePopup);
+
+    const clickHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+    clickHandler.setInputAction((click) => {
+      const picked = viewer.scene.pick(click.position);
+      if (picked && entityBookMap.has(picked.id)) {
+        const { book, loc } = entityBookMap.get(picked.id);
+        const pos = Cesium.Cartesian3.fromDegrees(loc.lng, loc.lat);
+        showPopup(book, pos);
+      } else {
+        hidePopup();
+      }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    /* =======================================================
+       RENDER BOOK GRID
+    ======================================================= */
+
+    function renderBooks(books) {
+      const list = document.getElementById("bookList");
+      const count = document.getElementById("bookCount");
+      list.innerHTML = "";
+
+      count.textContent = `${books.length} book${books.length === 1 ? "" : "s"}`;
+      list.classList.add("book-grid");
+
+      books.forEach(b => {
+        const card = document.createElement("div");
+        card.className = "book-card";
+
+        const coverUrl = fixCoverUrl(b.cover_url);
+        const title = b.title || "Untitled";
+        const authorText = (b.author || "Unknown author") + (b.year ? " • " + b.year : "");
+        const firstLoc = (b.locations || [])[0]?.place_name || "";
+
+        card.innerHTML = `
+          <div class="book-cover" style="background-image:url('${coverUrl}')"></div>
+          <div class="book-body">
+            <div class="book-title">${title}</div>
+            <div class="book-author">${authorText}</div>
+            <div class="book-meta">
+              <span class="book-location-chip" title="${firstLoc}">
+                ${firstLoc || "—"}
+              </span>
+              ${b.pdf_file ? `
+                <button type="button" class="book-read-btn">
+                  <i class="fa fa-book-open"></i><span>Read</span>
+                </button>` : ""}
+            </div>
+          </div>
+        `;
+
+        card.addEventListener("click", (e) => {
+          const loc = (b.locations || [])[0];
+          if (!loc) return;
+
+          if (e.target.closest(".book-read-btn")) {
+            openReader(b.id);
+            return;
+          }
+
+          viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(loc.lng, loc.lat, 2500000),
+            duration: 1.5
+          });
+        });
+
+        list.appendChild(card);
+      });
+    }
+
+    /* =======================================================
+       SEARCH BAR (GLOBAL)
+    ======================================================= */
+
+    const globalSearch = document.getElementById("globalSearch");
+    let searchTimer = null;
+
+    globalSearch.addEventListener("input", () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(handleSearch, 300);
+    });
+
+    async function handleSearch() {
+      const q = globalSearch.value.trim();
+      if (!q) {
+        hidePopup();
+        return loadBooksInView();
+      }
+
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`).catch(() => null);
+      if (res && res.ok) {
+        const data = await res.json();
+        if (data.books?.length) {
+          const books = applyFilters(data.books);
+          lastBooks = books;
+          renderBooks(books);
+          renderMarkers(books);
+          rebuildHeatmap(books);
+          hidePopup();
+          return;
+        }
+      }
+
+      // If no books, try jump to place
+      const loc = await searchLocationByName(q);
+      if (loc) {
+        const rect = Cesium.Rectangle.fromDegrees(
+          loc.bbox.west,
+          loc.bbox.south,
+          loc.bbox.east,
+          loc.bbox.north
+        );
+        viewer.camera.flyTo({ destination: rect, duration: 1.6 });
+        hidePopup();
+        setTimeout(loadBooksInView, 1600);
+      }
+    }
+
+    /* =======================================================
+       TAG / CATEGORY FILTERS
+    ======================================================= */
+
+    document.getElementById("tagFilter").addEventListener("input", (e) => {
+      activeTagFilter = e.target.value.toLowerCase();
+      const f = applyFilters(lastBooks);
+      renderBooks(f);
+      renderMarkers(f);
+      rebuildHeatmap(f);
+      hidePopup();
+    });
+
+    document.getElementById("categoryFilter").addEventListener("input", (e) => {
+      activeCategoryFilter = e.target.value.toLowerCase();
+      const f = applyFilters(lastBooks);
+      renderBooks(f);
+      renderMarkers(f);
+      rebuildHeatmap(f);
+      hidePopup();
+    });
+
+    /* =======================================================
+       ADD BOOK PANEL LOGIC
+    ======================================================= */
+
+    const addPanel = document.getElementById("addPanel");
+    const mapSection = document.getElementById("mapSection");
+    const booksSection = document.getElementById("booksSection");
+    const addPanelToggle = document.getElementById("addPanelToggle");
+    const addFab = document.getElementById("addBookFab");
+    const topAddBtn = document.getElementById("topAddBtn");
+
+    function openAddPanel() {
+      addPanel.classList.add("open");
+      mapSection.classList.add("map-mini");
+      booksSection.classList.add("hide");
+    }
+
+    function closeAddPanel() {
+      addPanel.classList.remove("open");
+      mapSection.classList.remove("map-mini");
+      booksSection.classList.remove("hide");
+    }
+
+    function toggleAddPanel() {
+      if (addPanel.classList.contains("open")) closeAddPanel();
+      else openAddPanel();
+    }
+
+    addPanelToggle.onclick = closeAddPanel;
+    addFab.onclick = openAddPanel;
+    topAddBtn.onclick = openAddPanel;
+
+    /* =======================================================
+       SUBMIT NEW BOOK
+    ======================================================= */
+
+    const addForm = document.getElementById("addBookForm");
+    const saveBtn = document.getElementById("saveBookBtn");
+
+    addForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      saveBtn.classList.add("loading");
+      saveBtn.disabled = true;
+
+      try {
+        const form = new FormData(addForm);
+        const pdf = document.getElementById("pdf_file").files[0] || null;
+
+        const title = (form.get("title") || "").trim();
+        const author = (form.get("author") || "").trim();
+        const place = (form.get("place") || "").trim();
+
+        if (!title || !author || !place) {
+          alert("Title, author and location are required.");
+          return;
+        }
+
+        const loc = await searchLocationByName(place);
+        if (!loc) {
+          alert("Location not found. Please try a more specific place name.");
+          return;
+        }
+
+        const payload = {
+          title,
+          author,
+          description: form.get("description") || null,
+          year: form.get("year") ? parseInt(form.get("year")) : null,
+          category: form.get("category") || null,
+          tags: (form.get("tags") || "")
+            .split(",")
+            .map(t => t.trim())
+            .filter(Boolean),
+          cover_url: form.get("cover_url") || null,
+          locations: [
+            {
+              geo: { type: "Point", coordinates: [loc.lng, loc.lat] },
+              place_name: place
+            }
+          ]
+        };
+
+        const fd = new FormData();
+        fd.append("data", JSON.stringify(payload));
+        if (pdf) fd.append("pdf_file", pdf);
+
+        const res = await fetch("/api/book-with-pdf", {
+          method: "POST",
+          body: fd
+        }).catch(() => null);
+
+        if (res && res.ok) {
+          addForm.reset();
+          closeAddPanel();
+          loadBooksInView();
+        } else {
+          const err = res ? await res.json().catch(() => ({})) : {};
+          alert("Save failed: " + (err.error || (res ? res.statusText : "network error")));
+        }
+
+      } finally {
+        saveBtn.classList.remove("loading");
+        saveBtn.disabled = false;
+      }
+    });
+
+    /* =======================================================
+       INITIAL VIEW
+    ======================================================= */
+
+    // Start looking at the world
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(10, 20, 25000000)
+    });
+
+    loadBooksInView();
+
+    /* ===========================================
+   LOAD RECENTLY ADDED BOOKS
+=========================================== */
+
+async function loadRecentlyAdded() {
+  const res = await fetch("/api/recent").catch(() => null);
+  if (!res || !res.ok) return;
+
+  const data = await res.json();
+  const books = data.books || [];
+
+  const slider = document.getElementById("recentSlider");
+  slider.innerHTML = "";
+
+  books.forEach(b => {
+    const cover = fixCoverUrl(b.cover_url);
+    const author = b.author || "Unknown";
+
+    const card = document.createElement("div");
+    card.className = "recent-card";
+
+    card.innerHTML = `
+      <div class="recent-cover" style="background-image:url('${cover}')"></div>
+      <div class="recent-body">
+        <div class="recent-title-text">${b.title}</div>
+        <div class="recent-author">${author}</div>
+      </div>
+    `;
+
+    card.onclick = () => openReader(b.id);
+    slider.appendChild(card);
+  });
+}
+
+
+// Load on page start
+loadRecentlyAdded();
+
+  </script>
 </body>
 </html>
