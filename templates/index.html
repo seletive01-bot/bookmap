@@ -425,7 +425,7 @@
 
     .book-cover {
   width: 100%;
-  height: 220px;                 /* Increased height */
+  height: 180px;                 /* Increased height */
   background-size: cover;
   background-position: top;      /* Shows the TOP of the cover */
   background-repeat: no-repeat;
@@ -1074,6 +1074,44 @@
     justify-content: space-between;
     align-items: center;
 }
+/* Default Desktop */
+#bookList.book-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+/* Large Mobile / Small Tablets (≥450px) */
+@media (max-width: 600px) and (min-width: 450px) {
+  #bookList.book-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Small Mobile (≤449px) */
+@media (max-width: 449px) {
+  #bookList.book-grid {
+    grid-template-columns: repeat(2, 1fr);   /* force 2 per row */
+  }
+}
+
+/* Extra small phones (≤320px) — fallback to 1 per row */
+@media (max-width: 320px) {
+  #bookList.book-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.book-card {
+  height: 280px;        /* reduced from 320px */
+}
+
+.book-cover {
+  height: 180px;        /* reduced from 220px */
+  background-size: cover;
+  background-position: top;
+}
+
 
   </style>
 </head>
